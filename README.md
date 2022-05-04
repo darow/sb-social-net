@@ -20,7 +20,7 @@
 <h3>Публичные</h3>
 
 <details>
-  <summary style="color: darkseagreen;">🟢POST /users/</summary>
+  <summary style="color: darkseagreen;">🟢POST /users</summary>
 
 ### Создание пользователя ###
 ##### request example #####
@@ -32,13 +32,25 @@
 </details>
 
 <details>
-  <summary style="color: darkseagreen;">🟢POST /users/</summary>
+  <summary style="color: darkseagreen;">🟢POST /make_friends</summary>
 
-### Создание пользователя ###
+### Добавление в друзья ###
 ##### request example #####
 
    ```bash
       curl -X POST -d '{"source_id":1,"target_id":2}' -H "Content-Type: application/json" http://localhost:8080/make_friends
+   ```
+
+</details>
+
+<details>
+  <summary style="color: darkseagreen;">🔴DELETE /user</summary>
+
+### Удаление пользователя ###
+##### request example #####
+
+   ```bash
+      curl -X DELETE -d '{"target_id":2}' -H "Content-Type: application/json" http://localhost:8080/user
    ```
 
 </details>

@@ -75,7 +75,6 @@ func (s *server) handleMakeFriends() http.HandlerFunc {
 
 func (s *server) handleDelete() http.HandlerFunc {
 	type request struct {
-		SourceID int `json:"source_id"`
 		TargetID int `json:"target_id"`
 	}
 
@@ -85,17 +84,13 @@ func (s *server) handleDelete() http.HandlerFunc {
 			s.error(w, r, http.StatusBadRequest, err)
 		}
 
-		u1, err := s.store.User().FindByID(req.SourceID)
-		if err != nil {
-			s.error(w, r, http.StatusBadRequest, err)
-		}
-		u2, err := s.store.User().FindByID(req.TargetID)
+		u1, err := s.store.User().FindByID(req.TargetID)
 		if err != nil {
 			s.error(w, r, http.StatusBadRequest, err)
 		}
 
-		s.store.User().MakeFriends(*u1, *u2)
+		s.store.User().Delete(u1)
 
-		s.respond(w, r, http.StatusOK, map[string]string{"msg": fmt.Sprintf("%s и %s теперь друзья", u1.Name, u2.Name)})
+		s.respond(w, r, http.StatusOK, map[string]string{"msg": fmt.Sprintf("%s удален", u1.Name)})
 	}
 }

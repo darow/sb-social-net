@@ -9,5 +9,6 @@ type Store interface {
 type UserRepository interface {
 	Create(model.User) int
 	MakeFriends(u1, u2 model.User)
+	Delete(u *model.User)
 	FindByID(int) (*model.User, error)
 }
