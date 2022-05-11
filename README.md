@@ -17,8 +17,6 @@
 
 ## Доступные методы ##
 
-<h3>Публичные</h3>
-
 <details>
   <summary style="color: darkseagreen;">🟢POST /users</summary>
 
@@ -26,9 +24,8 @@
 ##### request example #####
 
    ```bash
-      curl -X POST -d '{"name":"some name","age":"24","friends":[]}' -H "Content-Type: application/json" http://localhost:8080/create
+      curl -X POST -d '{"name":"name1","age":"24","friends":[]}' -H "Content-Type: application/json" http://localhost:8080/create
    ```
-
 </details>
 
 <details>
@@ -40,11 +37,10 @@
    ```bash
       curl -X POST -d '{"source_id":1,"target_id":2}' -H "Content-Type: application/json" http://localhost:8080/make_friends
    ```
-
 </details>
 
 <details>
-  <summary style="color: darkseagreen;">🔴DELETE /user</summary>
+  <summary style="color: red;">🔴DELETE /user</summary>
 
 ### Удаление пользователя ###
 ##### request example #####
@@ -52,6 +48,16 @@
    ```bash
       curl -X DELETE -d '{"target_id":2}' -H "Content-Type: application/json" http://localhost:8080/user
    ```
+</details>
 
+<details>
+  <summary style="color: blue;">🔵GET /friends/{user_id}</summary>
+
+### Получение списка друзей пользователя ###
+##### request example #####
+
+   ```bash
+      curl -X GET -H "Content-Type: application/json" http://localhost:8080/friends/1
+   ```
 </details>
 

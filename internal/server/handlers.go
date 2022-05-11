@@ -1,6 +1,7 @@
 package server
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -8,7 +9,7 @@ import (
 	"strconv"
 )
 
-func (s *server) handleCreate() http.HandlerFunc {
+func (s *server) Create() http.HandlerFunc {
 	type request struct {
 		Name    string `json:"name"`
 		Age     string `json:"age"`
@@ -46,7 +47,7 @@ func (s *server) handleCreate() http.HandlerFunc {
 	}
 }
 
-func (s *server) handleMakeFriends() http.HandlerFunc {
+func (s *server) MakeFriends() http.HandlerFunc {
 	type request struct {
 		SourceID int `json:"source_id"`
 		TargetID int `json:"target_id"`
@@ -69,11 +70,38 @@ func (s *server) handleMakeFriends() http.HandlerFunc {
 
 		s.store.User().MakeFriends(*u1, *u2)
 
-		s.respond(w, r, http.StatusOK, map[string]string{"msg": fmt.Sprintf("%s и %s теперь друзья", u1.Name, u2.Name)})
+		s.respond(w, r, http.StatusOK, map[string]string{"msg": fmt.Sprintf("%s добавил в друзья пользователя %s", u1.Name, u2.Name)})
 	}
 }
 
-func (s *server) handleDelete() http.HandlerFunc {
+func (s *server) GetFriends() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		user, ok := r.Context().Value(ctxUserKey{}).(*model.User)
+
+		if !ok {
+			s.respondError(w, r, http.StatusInternalServerError, ErrCtxDoesNotExist)
+		}
+
+		size := len(user.Friends) * 4
+		for _, v := range user.Friends {
+			size += len(strconv.Itoa(v.ID)) + len(v.Name) + len(strconv.Itoa(v.Age))
+		}
+
+		buf := bytes.NewBuffer(make([]byte, 0, size))
+		buf.WriteRune('[')
+		for i, v := range user.Friends {
+			if i != 0 {
+				buf.WriteString(", ")
+			}
+			buf.WriteString(fmt.Sprintf("%s %s %s", strconv.Itoa(v.ID), v.Name, strconv.Itoa(v.Age)))
+		}
+		buf.WriteRune(']')
+
+		s.respond(w, r, http.StatusOK, map[string]string{"friends_list": buf.String()})
+	}
+}
+
+func (s *server) Delete() http.HandlerFunc {
 	type request struct {
 		TargetID int `json:"target_id"`
 	}
