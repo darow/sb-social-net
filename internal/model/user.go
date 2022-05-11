@@ -12,6 +12,7 @@ func (u *User) RemoveFromFriends(user *User) {
 		if friend == user {
 			u.Friends[i], u.Friends[len(u.Friends)-1] = u.Friends[len(u.Friends)-1], u.Friends[i]
 			u.Friends = u.Friends[:len(u.Friends)-1]
+
 			break
 		}
 	}

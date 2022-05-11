@@ -19,19 +19,19 @@ func (s *server) handleCreate() http.HandlerFunc {
 		req := &request{}
 
 		if err := json.NewDecoder(r.Body).Decode(req); err != nil {
-			s.error(w, r, http.StatusBadRequest, err)
+			s.respondError(w, r, http.StatusBadRequest, err)
 		}
 
 		age, err := strconv.Atoi(req.Age)
 		if err != nil {
-			s.error(w, r, http.StatusBadRequest, err)
+			s.respondError(w, r, http.StatusBadRequest, err)
 		}
 
 		users := make([]*model.User, 0)
 		for _, v := range req.Friends {
 			u, err := s.store.User().FindByID(v)
 			if err != nil {
-				fmt.Println("user not found")
+				s.respondError(w, r, http.StatusBadRequest, err)
 			}
 			users = append(users, u)
 		}
@@ -55,16 +55,16 @@ func (s *server) handleMakeFriends() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		req := &request{}
 		if err := json.NewDecoder(r.Body).Decode(req); err != nil {
-			s.error(w, r, http.StatusBadRequest, err)
+			s.respondError(w, r, http.StatusBadRequest, err)
 		}
 
 		u1, err := s.store.User().FindByID(req.SourceID)
 		if err != nil {
-			s.error(w, r, http.StatusBadRequest, err)
+			s.respondError(w, r, http.StatusBadRequest, err)
 		}
 		u2, err := s.store.User().FindByID(req.TargetID)
 		if err != nil {
-			s.error(w, r, http.StatusBadRequest, err)
+			s.respondError(w, r, http.StatusBadRequest, err)
 		}
 
 		s.store.User().MakeFriends(*u1, *u2)
@@ -81,12 +81,12 @@ func (s *server) handleDelete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		req := &request{}
 		if err := json.NewDecoder(r.Body).Decode(req); err != nil {
-			s.error(w, r, http.StatusBadRequest, err)
+			s.respondError(w, r, http.StatusBadRequest, err)
 		}
 
 		u1, err := s.store.User().FindByID(req.TargetID)
 		if err != nil {
-			s.error(w, r, http.StatusBadRequest, err)
+			s.respondError(w, r, http.StatusBadRequest, err)
 		}
 
 		s.store.User().Delete(u1)

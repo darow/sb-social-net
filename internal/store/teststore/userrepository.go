@@ -1,7 +1,6 @@
 package teststore
 
 import (
-	"errors"
 	"sb_social_network/internal/model"
 )
 
@@ -18,6 +17,7 @@ func (r *UserRepository) Create(user model.User) int {
 	idCounter++
 	user.ID = idCounter
 	r.users[idCounter] = &user
+
 	return idCounter
 }
 
@@ -28,9 +28,9 @@ func (r *UserRepository) MakeFriends(user1, user2 model.User) {
 }
 
 // Delete Удаляем у всех пользователей из списка друзей. Можно переделать так, чтоб удалялось только у тех пользователей,
-//котороые в списке друзей удаляемого.
+// котороые в списке друзей удаляемого.
 func (r *UserRepository) Delete(user *model.User) {
-	delete(r.users, (*user).ID)
+	delete(r.users, user.ID)
 	for _, u := range r.users {
 		u.RemoveFromFriends(user)
 	}
@@ -49,7 +49,7 @@ func (r *UserRepository) contains(m []*model.User, e *model.User) bool {
 func (r *UserRepository) FindByID(id int) (*model.User, error) {
 	u, ok := r.users[id]
 	if !ok {
-		return nil, errors.New("error! FindByID user not found")
+		return nil, ErrObjectNotFound
 	}
 
 	return u, nil
