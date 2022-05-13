@@ -9,7 +9,7 @@ type User struct {
 
 func (u *User) RemoveFromFriends(user *User) {
 	for i, friend := range u.Friends {
-		if friend == user {
+		if friend.ID == user.ID {
 			u.Friends[i], u.Friends[len(u.Friends)-1] = u.Friends[len(u.Friends)-1], u.Friends[i]
 			u.Friends = u.Friends[:len(u.Friends)-1]
 

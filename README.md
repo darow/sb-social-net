@@ -23,9 +23,9 @@
 ### Создание пользователя ###
 ##### request example #####
 
-   ```bash
-      curl -X POST -d '{"name":"name1","age":"24","friends":[]}' -H "Content-Type: application/json" http://localhost:8080/create
-   ```
+```bash
+  curl -X POST -d '{"name":"name1","age":"24","friends":[]}' -H "Content-Type: application/json" http://localhost:8080/create
+```
 </details>
 
 <details>
@@ -33,10 +33,10 @@
 
 ### Добавление в друзья ###
 ##### request example #####
-
-   ```bash
-      curl -X POST -d '{"source_id":1,"target_id":2}' -H "Content-Type: application/json" http://localhost:8080/make_friends
-   ```
+    
+```bash
+  curl -X POST -d '{"source_id":1,"target_id":2}' -H "Content-Type: application/json" http://localhost:8080/make_friends
+```
 </details>
 
 <details>
@@ -45,9 +45,9 @@
 ### Удаление пользователя ###
 ##### request example #####
 
-   ```bash
-      curl -X DELETE -d '{"target_id":2}' -H "Content-Type: application/json" http://localhost:8080/user
-   ```
+```bash
+  curl -X DELETE -d '{"target_id":1}' -H "Content-Type: application/json" http://localhost:8080/user
+```
 </details>
 
 <details>
@@ -56,8 +56,18 @@
 ### Получение списка друзей пользователя ###
 ##### request example #####
 
-   ```bash
+```bash
       curl -X GET -H "Content-Type: application/json" http://localhost:8080/friends/1
-   ```
+```
 </details>
 
+<details>
+  <summary style="color: orange;">🟠PUT /{user_id}</summary>
+
+### Изменение возраста пользователя ###
+##### request example #####
+
+```bash
+  curl -X PUT -d '{"new age": 14}' -H "Content-Type: application/json" http://localhost:8080/1
+```
+</details>

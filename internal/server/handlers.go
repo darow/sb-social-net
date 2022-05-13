@@ -12,7 +12,7 @@ import (
 func (s *server) Create() http.HandlerFunc {
 	type request struct {
 		Name    string `json:"name"`
-		Age     string `json:"age"`
+		Age     int    `json:"age"`
 		Friends []int  `json:"friends"`
 	}
 
@@ -21,11 +21,7 @@ func (s *server) Create() http.HandlerFunc {
 
 		if err := json.NewDecoder(r.Body).Decode(req); err != nil {
 			s.respondError(w, r, http.StatusBadRequest, err)
-		}
-
-		age, err := strconv.Atoi(req.Age)
-		if err != nil {
-			s.respondError(w, r, http.StatusBadRequest, err)
+			return
 		}
 
 		users := make([]*model.User, 0)
@@ -33,13 +29,14 @@ func (s *server) Create() http.HandlerFunc {
 			u, err := s.store.User().FindByID(v)
 			if err != nil {
 				s.respondError(w, r, http.StatusBadRequest, err)
+				return
 			}
 			users = append(users, u)
 		}
 
 		u := model.User{
 			Name:    req.Name,
-			Age:     age,
+			Age:     req.Age,
 			Friends: users,
 		}
 		id := s.store.User().Create(u)
@@ -57,20 +54,47 @@ func (s *server) MakeFriends() http.HandlerFunc {
 		req := &request{}
 		if err := json.NewDecoder(r.Body).Decode(req); err != nil {
 			s.respondError(w, r, http.StatusBadRequest, err)
+			return
 		}
 
 		u1, err := s.store.User().FindByID(req.SourceID)
 		if err != nil {
 			s.respondError(w, r, http.StatusBadRequest, err)
+			return
 		}
 		u2, err := s.store.User().FindByID(req.TargetID)
 		if err != nil {
 			s.respondError(w, r, http.StatusBadRequest, err)
+			return
 		}
 
 		s.store.User().MakeFriends(*u1, *u2)
 
-		s.respond(w, r, http.StatusOK, map[string]string{"msg": fmt.Sprintf("%s добавил в друзья пользователя %s", u1.Name, u2.Name)})
+		s.respond(w, r, http.StatusOK, map[string]string{"msg": fmt.Sprintf("%s и %s теперь друзья", u1.Name, u2.Name)})
+	}
+}
+
+func (s *server) Delete() http.HandlerFunc {
+	type request struct {
+		TargetID int `json:"target_id"`
+	}
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		req := &request{}
+		if err := json.NewDecoder(r.Body).Decode(req); err != nil {
+			s.respondError(w, r, http.StatusBadRequest, err)
+			return
+		}
+
+		u1, err := s.store.User().FindByID(req.TargetID)
+		if err != nil {
+			s.respondError(w, r, http.StatusBadRequest, err)
+			return
+		}
+
+		s.store.User().Delete(u1)
+
+		s.respond(w, r, http.StatusOK, map[string]string{"msg": fmt.Sprintf("%s удален", u1.Name)})
 	}
 }
 
@@ -80,6 +104,7 @@ func (s *server) GetFriends() http.HandlerFunc {
 
 		if !ok {
 			s.respondError(w, r, http.StatusInternalServerError, ErrCtxDoesNotExist)
+			return
 		}
 
 		size := len(user.Friends) * 4
@@ -101,24 +126,28 @@ func (s *server) GetFriends() http.HandlerFunc {
 	}
 }
 
-func (s *server) Delete() http.HandlerFunc {
+func (s *server) SetAge() http.HandlerFunc {
 	type request struct {
-		TargetID int `json:"target_id"`
+		NewAge int `json:"new age"`
 	}
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		req := &request{}
+		user, ok := r.Context().Value(ctxUserKey{}).(*model.User)
+
+		if !ok {
+			s.respondError(w, r, http.StatusInternalServerError, ErrCtxDoesNotExist)
+		}
+
 		if err := json.NewDecoder(r.Body).Decode(req); err != nil {
 			s.respondError(w, r, http.StatusBadRequest, err)
 		}
 
-		u1, err := s.store.User().FindByID(req.TargetID)
-		if err != nil {
-			s.respondError(w, r, http.StatusBadRequest, err)
+		previousAge := user.Age
+		if err := s.store.User().SetAge(user, req.NewAge); err != nil {
+			s.respondError(w, r, http.StatusInternalServerError, err)
 		}
 
-		s.store.User().Delete(u1)
-
-		s.respond(w, r, http.StatusOK, map[string]string{"msg": fmt.Sprintf("%s удален", u1.Name)})
+		s.respond(w, r, http.StatusOK, map[string]string{"msg": fmt.Sprintf("возраст %s изменен с %d на %d", user.Name, previousAge, user.Age)})
 	}
 }

@@ -28,11 +28,17 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *server) configureRouter() {
-	s.router.MethodFunc("POST", "/create", s.Create())
-	s.router.MethodFunc("POST", "/make_friends", s.MakeFriends())
-	s.router.MethodFunc("DELETE", "/user", s.Delete())
+	s.router.MethodFunc(http.MethodPost, "/create", s.Create())
+	s.router.MethodFunc(http.MethodPost, "/make_friends", s.MakeFriends())
+	s.router.MethodFunc(http.MethodDelete, "/user", s.Delete())
+
 	s.router.Route("/friends/{userID}", func(r chi.Router) {
 		r.Use(s.userCtx)
 		r.Get("/", s.GetFriends())
+	})
+
+	s.router.Route("/{userID}", func(r chi.Router) {
+		r.Use(s.userCtx)
+		r.Put("/", s.SetAge())
 	})
 }

@@ -24,16 +24,27 @@ func (r *UserRepository) Create(user model.User) int {
 func (r *UserRepository) MakeFriends(user1, user2 model.User) {
 	if !r.contains(r.users[user1.ID].Friends, &user2) {
 		r.users[user1.ID].Friends = append(r.users[user1.ID].Friends, &user2)
+		r.users[user2.ID].Friends = append(r.users[user2.ID].Friends, &user1)
 	}
 }
 
 // Delete Удаляем у всех пользователей из списка друзей. Можно переделать так, чтоб удалялось только у тех пользователей,
 // котороые в списке друзей удаляемого.
 func (r *UserRepository) Delete(user *model.User) {
-	delete(r.users, user.ID)
 	for _, u := range r.users {
 		u.RemoveFromFriends(user)
 	}
+	delete(r.users, user.ID)
+}
+
+func (r *UserRepository) SetAge(user *model.User, newAge int) error {
+	u, ok := r.users[user.ID]
+	if !ok {
+		return ErrObjectNotFound
+	}
+	u.Age = newAge
+
+	return nil
 }
 
 func (r *UserRepository) contains(m []*model.User, e *model.User) bool {
