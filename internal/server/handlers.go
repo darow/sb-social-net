@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"sb_social_network/internal/model"
+	"sb_social_network/internal/models"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func (s *server) Create() http.HandlerFunc {
@@ -24,7 +26,7 @@ func (s *server) Create() http.HandlerFunc {
 			return
 		}
 
-		friends := make([]string, 0)
+		friends := make([]primitive.ObjectID, 0)
 		for _, v := range req.Friends {
 			u, err := s.store.User().FindByID(v)
 			if err != nil {
@@ -34,7 +36,7 @@ func (s *server) Create() http.HandlerFunc {
 			friends = append(friends, u.ID)
 		}
 
-		u := model.User{
+		u := models.User{
 			Name:    req.Name,
 			Age:     req.Age,
 			Friends: friends,
@@ -100,7 +102,7 @@ func (s *server) Delete() http.HandlerFunc {
 
 func (s *server) GetFriends() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		user, ok := r.Context().Value(ctxUserKey{}).(*model.User)
+		user, ok := r.Context().Value(ctxUserKey{}).(*models.User)
 
 		if !ok {
 			s.respondError(w, r, http.StatusInternalServerError, ErrCtxDoesNotExist)
@@ -109,8 +111,7 @@ func (s *server) GetFriends() http.HandlerFunc {
 
 		size := len(user.Friends) * 4
 		for _, v := range user.Friends {
-			size += len(v)
-			//+ len(v.Name) + len(strconv.Itoa(v.Age))
+			size += len(fmt.Sprintf("%s", v))
 		}
 
 		buf := bytes.NewBuffer(make([]byte, 0, size))
@@ -120,7 +121,6 @@ func (s *server) GetFriends() http.HandlerFunc {
 				buf.WriteString(", ")
 			}
 			buf.WriteString(fmt.Sprintf("%s", v))
-			//, v.Name, strconv.Itoa(v.Age)))
 		}
 		buf.WriteRune(']')
 
@@ -135,7 +135,7 @@ func (s *server) SetAge() http.HandlerFunc {
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		req := &request{}
-		user, ok := r.Context().Value(ctxUserKey{}).(*model.User)
+		user, ok := r.Context().Value(ctxUserKey{}).(*models.User)
 
 		if !ok {
 			s.respondError(w, r, http.StatusInternalServerError, ErrCtxDoesNotExist)
@@ -146,10 +146,8 @@ func (s *server) SetAge() http.HandlerFunc {
 		}
 
 		previousAge := user.Age
-		if err := s.store.User().SetAge(user, req.NewAge); err != nil {
-			s.respondError(w, r, http.StatusInternalServerError, err)
-		}
+		s.store.User().SetAge(user, req.NewAge)
 
-		s.respond(w, r, http.StatusOK, map[string]string{"msg": fmt.Sprintf("возраст %s изменен с %d на %d", user.Name, previousAge, user.Age)})
+		s.respond(w, r, http.StatusOK, map[string]string{"msg": fmt.Sprintf("возраст %s изменен с %d на %d", user.Name, previousAge, req.NewAge)})
 	}
 }

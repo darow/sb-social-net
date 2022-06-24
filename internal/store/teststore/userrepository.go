@@ -3,7 +3,6 @@ package teststore
 import (
 	"fmt"
 
-	"sb_social_network/internal/model"
 	"sb_social_network/internal/store"
 )
 

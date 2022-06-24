@@ -1,7 +1,6 @@
 package teststore
 
 import (
-	"sb_social_network/internal/model"
 	"sb_social_network/internal/store"
 )
 
