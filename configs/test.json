@@ -1,0 +1,7 @@
+{
+  "db": {
+    "uri": "mongodb://localhost:27017",
+    "name": "test1",
+    "timeout": 10000000000
+  }
+}

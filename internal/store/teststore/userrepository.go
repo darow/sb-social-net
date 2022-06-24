@@ -1,7 +1,10 @@
 package teststore
 
 import (
+	"fmt"
+
 	"sb_social_network/internal/model"
+	"sb_social_network/internal/store"
 )
 
 var (
@@ -10,26 +13,25 @@ var (
 
 type UserRepository struct {
 	store *Store
-	users map[int]*model.User
+	users map[string]*model.User
 }
 
-func (r *UserRepository) Create(user model.User) int {
+func (r *UserRepository) Create(user model.User) string {
 	idCounter++
-	user.ID = idCounter
-	r.users[idCounter] = &user
+	user.ID = fmt.Sprintf("%d", idCounter)
+	r.users[user.ID] = &user
 
-	return idCounter
+	return user.ID
 }
 
 func (r *UserRepository) MakeFriends(user1, user2 model.User) {
-	if !r.contains(r.users[user1.ID].Friends, &user2) {
-		r.users[user1.ID].Friends = append(r.users[user1.ID].Friends, &user2)
-		r.users[user2.ID].Friends = append(r.users[user2.ID].Friends, &user1)
+	if !r.contains(r.users[user1.ID].Friends, user2.ID) {
+		r.users[user1.ID].Friends = append(r.users[user1.ID].Friends, user2.ID)
+		r.users[user2.ID].Friends = append(r.users[user2.ID].Friends, user1.ID)
 	}
 }
 
-// Delete Удаляем у всех пользователей из списка друзей. Можно переделать так, чтоб удалялось только у тех пользователей,
-// котороые в списке друзей удаляемого.
+// Delete Удаляем пользователя и ссылки на дружбу с ним у всех пользователей.
 func (r *UserRepository) Delete(user *model.User) {
 	for _, u := range r.users {
 		u.RemoveFromFriends(user)
@@ -40,16 +42,16 @@ func (r *UserRepository) Delete(user *model.User) {
 func (r *UserRepository) SetAge(user *model.User, newAge int) error {
 	u, ok := r.users[user.ID]
 	if !ok {
-		return ErrObjectNotFound
+		return store.ErrObjectNotFound
 	}
 	u.Age = newAge
 
 	return nil
 }
 
-func (r *UserRepository) contains(m []*model.User, e *model.User) bool {
-	for _, a := range m {
-		if a == e {
+func (r *UserRepository) contains(m []string, id string) bool {
+	for _, e := range m {
+		if e == id {
 			return true
 		}
 	}
@@ -57,10 +59,10 @@ func (r *UserRepository) contains(m []*model.User, e *model.User) bool {
 	return false
 }
 
-func (r *UserRepository) FindByID(id int) (*model.User, error) {
+func (r *UserRepository) FindByID(id string) (*model.User, error) {
 	u, ok := r.users[id]
 	if !ok {
-		return nil, ErrObjectNotFound
+		return nil, store.ErrObjectNotFound
 	}
 
 	return u, nil

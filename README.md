@@ -24,7 +24,7 @@
 ##### request example #####
 
 ```bash
-  curl -X POST -d '{"name":"name1","age":"24","friends":[]}' -H "Content-Type: application/json" http://localhost:8080/create
+  curl -X POST -d '{"name":"name1","age":24,"friends":[]}' -H "Content-Type: application/json" http://localhost:8080/create
 ```
 </details>
 
@@ -35,7 +35,7 @@
 ##### request example #####
     
 ```bash
-  curl -X POST -d '{"source_id":1,"target_id":2}' -H "Content-Type: application/json" http://localhost:8080/make_friends
+  curl -X POST -d '{"source_id":"62b19382c518bfa78f3f1d7e","target_id":"62b1b528c518bfa78f3f1d7f"}' -H "Content-Type: application/json" http://localhost:8080/make_friends
 ```
 </details>
 
@@ -46,7 +46,7 @@
 ##### request example #####
 
 ```bash
-  curl -X DELETE -d '{"target_id":1}' -H "Content-Type: application/json" http://localhost:8080/user
+  curl -X DELETE -d '{"target_id":"62b19382c518bfa78f3f1d7e"}' -H "Content-Type: application/json" http://localhost:8080/user
 ```
 </details>
 

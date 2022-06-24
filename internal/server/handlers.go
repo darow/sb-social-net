@@ -5,15 +5,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+
 	"sb_social_network/internal/model"
-	"strconv"
 )
 
 func (s *server) Create() http.HandlerFunc {
 	type request struct {
-		Name    string `json:"name"`
-		Age     int    `json:"age"`
-		Friends []int  `json:"friends"`
+		Name    string   `json:"name"`
+		Age     int      `json:"age"`
+		Friends []string `json:"friends"`
 	}
 
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -24,30 +24,30 @@ func (s *server) Create() http.HandlerFunc {
 			return
 		}
 
-		users := make([]*model.User, 0)
+		friends := make([]string, 0)
 		for _, v := range req.Friends {
 			u, err := s.store.User().FindByID(v)
 			if err != nil {
 				s.respondError(w, r, http.StatusBadRequest, err)
 				return
 			}
-			users = append(users, u)
+			friends = append(friends, u.ID)
 		}
 
 		u := model.User{
 			Name:    req.Name,
 			Age:     req.Age,
-			Friends: users,
+			Friends: friends,
 		}
 		id := s.store.User().Create(u)
-		s.respond(w, r, http.StatusCreated, map[string]int{"id": id})
+		s.respond(w, r, http.StatusCreated, map[string]any{"id": id})
 	}
 }
 
 func (s *server) MakeFriends() http.HandlerFunc {
 	type request struct {
-		SourceID int `json:"source_id"`
-		TargetID int `json:"target_id"`
+		SourceID string `json:"source_id"`
+		TargetID string `json:"target_id"`
 	}
 
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -76,7 +76,7 @@ func (s *server) MakeFriends() http.HandlerFunc {
 
 func (s *server) Delete() http.HandlerFunc {
 	type request struct {
-		TargetID int `json:"target_id"`
+		TargetID string `json:"target_id"`
 	}
 
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -109,7 +109,8 @@ func (s *server) GetFriends() http.HandlerFunc {
 
 		size := len(user.Friends) * 4
 		for _, v := range user.Friends {
-			size += len(strconv.Itoa(v.ID)) + len(v.Name) + len(strconv.Itoa(v.Age))
+			size += len(v)
+			//+ len(v.Name) + len(strconv.Itoa(v.Age))
 		}
 
 		buf := bytes.NewBuffer(make([]byte, 0, size))
@@ -118,7 +119,8 @@ func (s *server) GetFriends() http.HandlerFunc {
 			if i != 0 {
 				buf.WriteString(", ")
 			}
-			buf.WriteString(fmt.Sprintf("%s %s %s", strconv.Itoa(v.ID), v.Name, strconv.Itoa(v.Age)))
+			buf.WriteString(fmt.Sprintf("%s", v))
+			//, v.Name, strconv.Itoa(v.Age)))
 		}
 		buf.WriteRune(']')
 
