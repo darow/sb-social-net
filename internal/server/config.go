@@ -13,7 +13,8 @@ type ConfigDB struct {
 }
 
 type Config struct {
-	DB ConfigDB `json:"db"`
+	Host string   `json:"host"`
+	DB   ConfigDB `json:"db"`
 }
 
 func NewConfig(configPath string) (*Config, error) {

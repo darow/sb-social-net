@@ -21,7 +21,7 @@ func Start(config *Config) error {
 	store := mongostore.New(db)
 	s := NewServer(store)
 
-	return http.ListenAndServe(":8080", s)
+	return http.ListenAndServe(config.Host, s)
 }
 
 func newDB(cfg ConfigDB) (*mongo.Database, error) {

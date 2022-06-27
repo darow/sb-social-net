@@ -70,6 +70,38 @@
 ##### request example #####
 
 ```bash
-  curl -X PUT -d '{"new age": 14}' -H "Content-Type: application/json" http://localhost:8080/62b5b79fe8ac95cfdd5d1d4e
+  curl -X PUT -d '{"new age": 14}' -H "Content-Type: application/json" http://localhost:8082/62b5b79fe8ac95cfdd5d1d4e
 ```
+</details>
+
+## Запускаем два приложения и reverse proxy балансировщик нагрузки ##
+
+<details>
+  <summary>Запускаем первый сервер:</summary>
+
+```bash
+  go run .\cmd\api\ --config-path configs/test.json
+```
+</details>
+
+<details>
+  <summary>Запускаем второй сервер:</summary>
+
+```bash
+  go run .\cmd\api\ --config-path configs/test2.json
+```
+</details>
+
+<details>
+  <summary>Запускаем сервер балансировщик нагрузки:</summary>
+
+```bash
+  go run .\reverseproxy\simple\
+```
+
+Далее в консоли балансировщика можем увидеть какой сервер обработал входящий запрос.
+
+throwing request to http://localhost:8081
+или
+throwing request to http://localhost:8080
 </details>
